@@ -13,7 +13,13 @@ public class ServiceBusTopicConsumer : BackgroundService
     public ServiceBusTopicConsumer(IOptions<ServiceBusConsumerOptions> options)
     {
         _options = options.Value;
-        var client = new ServiceBusClient(_options.ConnectionString);
+        var client = new ServiceBusClient(_options.ConnectionString, new ServiceBusClientOptions()
+        {
+            RetryOptions = new ServiceBusRetryOptions()
+            {
+                TryTimeout = TimeSpan.FromHours(1)
+            }
+        });
         _processor = client.CreateProcessor(TopicName, SubscriptionName, new ServiceBusProcessorOptions());
     }
 

@@ -12,8 +12,14 @@ public class ServiceBusQueueConsumer : BackgroundService
     public ServiceBusQueueConsumer(IOptions<ServiceBusConsumerOptions> options)
     {
         _options = options.Value;
-        var client = new ServiceBusClient(_options.ConnectionString);
-        _processor = client.CreateProcessor(QueueName, new ServiceBusProcessorOptions());
+        var client = new ServiceBusClient(_options.ConnectionString, new ServiceBusClientOptions()
+        {
+            RetryOptions = new ServiceBusRetryOptions()
+            {
+                TryTimeout = TimeSpan.FromHours(1)
+            }
+        });
+        _processor = client.CreateProcessor(QueueName);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
